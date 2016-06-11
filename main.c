@@ -58,19 +58,18 @@ int main() {
 
                 Square *currentSquare = listOfLogicSquare[currentPlayer->currentBlock];
 
-                printf("collide\n");
                 collisionDetection(i);
                 SDL_RenderClear(gRenderer);
                 SDL_RenderCopy(gRenderer, board, NULL, NULL);
 
-                renderMoney();
+                //renderMoney();
 
                 for (int q = 0; q < NUM_PLAYER; q++) {
                     renderPlayer(q);
                 }
 
                 SDL_RenderPresent(gRenderer);
-
+                /*        
                 switch (currentSquare->type) {
                     case DEPARTMENT:
                         department(i);
@@ -104,18 +103,18 @@ int main() {
                         exit(EXIT_FAILURE);
                 }
 
+                */
+
                 //count = (count + 1) % NUM_PLAYER;
 
 
-            } else {
-                //printf("hello \n");
-            }
+            } 
         }
 
         RENDER:
         SDL_RenderClear(gRenderer);
         SDL_RenderCopy(gRenderer, board, NULL, NULL);
-        renderMoney();
+        //renderMoney();
 
 
         for (int q = 0; q < NUM_PLAYER; q++) {
@@ -376,7 +375,7 @@ void animation(int previousBoard, int i) {
             }
 
             renderCurrentPlayer(i, start);
-            renderMoney();
+            //renderMoney();
 
             SDL_RenderPresent(gRenderer);
             SDL_Delay(SPEED);
@@ -436,7 +435,7 @@ bool init() {
                                SDL_WINDOW_SHOWN|SDL_WINDOW_OPENGL );  
     
     
-    gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_SOFTWARE);
+    gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
     //SDL_RenderSetLogicalSize(gRenderer, WIDTH, HEIGHT);
     gfont = TTF_OpenFont("myfont.ttf", FONT_SIZE);
