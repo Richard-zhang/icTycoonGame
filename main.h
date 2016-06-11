@@ -17,9 +17,9 @@
 #define HEIGHT 1086
 #define FONT_SIZE 100
 #define NUM_PLAYER 4
-#define WIDTH_OF_PLAYER 30
+#define WIDTH_OF_PLAYER 45
 #define NUM_SQUARE 41
-#define SPEED 10
+#define SPEED 30
 #define DICE_SIZE 6
 #define OFFSET 224
 
@@ -34,9 +34,27 @@
 #define NUM_OF_CHANCE 8
 #define X_MIDDLE_BOARD 354
 #define Y_MIDDLE_BOARD 369
+
+
+
+//animation
+#define ANIMATION_FRAMES 3
+#define ANIMATION_DISPLACE 10
+void loadIndCha(int id);
+bool animatedRowOne(int start, int end, int i);
+bool animatedColOne(int start, int end, int i);
+bool animatedRowTwo(int start, int end, int i);
+bool animatedColTwo(int start, int end, int i);
+
+void aniRenderPlayer(int i,int direction, int frame, int x, int y);
+void renderAllPlayer();
+void initAnimation();
+
 //SDL position rect
 SDL_Rect upper;
 SDL_Rect lower;
+
+
 
 enum student{
     INTERNATIONAL = 0,
@@ -97,6 +115,7 @@ TTF_Font *gfont;
 SDL_Rect startRect;
 SDL_Rect listOfSquare[NUM_SQUARE];
 SDL_Rect posiVecMoney[NUM_PLAYER];
+SDL_Rect aniSprite[NUM_PLAYER][NUM_PLAYER][ANIMATION_FRAMES];
 struct square *listOfLogicSquare[NUM_SQUARE];
 struct chanceCard *listOfChances[NUM_OF_CHANCE];
 

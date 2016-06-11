@@ -2,7 +2,7 @@
 #include "main.h"
 
 int main() {
-
+    initAnimation();
     init();
     loadBoard();
     loadCharacter();
@@ -13,8 +13,6 @@ int main() {
     bool quit = false;
     SDL_Event e;
     int count = 0;
-	
-	printf("hello world\n");
 
     while(!quit) {
 
@@ -32,7 +30,7 @@ int main() {
         if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
             if (e.key.keysym.sym == SDLK_r) {
                 int i = count;
-
+                printf("hihi\n");
                 count = (count + 1) % NUM_PLAYER;
 
                 struct player *currentPlayer = listOfPlayers[i];
@@ -364,6 +362,214 @@ int mimicDice() {
     return dice;
 }
 
+bool animatedRowOne(int start, int end, int i) {
+    if (end <= start) {
+        return false;
+    }
+    //board from 0 to 9;
+    int frame = 0;
+    int direction = 1;
+    int start_x = listOfSquare[start].x;
+    int end_x = listOfSquare[end].x;
+
+    int y_axis = listOfSquare[start].y;
+
+    while(start_x >= end_x) {
+
+        SDL_RenderCopy(gRenderer, board, NULL, NULL);
+        for (int q = 0; q < NUM_PLAYER; q++) {
+            if (q != i) renderPlayer(q);
+        }
+
+
+        aniRenderPlayer(i, direction, frame, start_x, y_axis);
+
+        //renderMoney();
+
+        SDL_RenderPresent(gRenderer);
+        SDL_Delay(SPEED);
+        SDL_RenderClear(gRenderer);
+
+
+        frame = (frame + 1) % ANIMATION_FRAMES;
+        start_x -= ANIMATION_DISPLACE;
+    }
+
+    return true;
+}
+
+
+bool animatedRowTwo(int start, int end, int i) {
+    if(end <= start) {
+        return false;
+    }
+    //board from 0 to 9;
+    int frame = 0;
+    int direction = 2;
+    int start_x = listOfSquare[start].x;
+    int end_x = listOfSquare[end].x;
+
+    int y_axis = listOfSquare[start].y;
+
+    while(start_x <= end_x) {
+
+        SDL_RenderCopy(gRenderer, board, NULL, NULL);
+        for (int q = 0; q < NUM_PLAYER; q++) {
+            if (q != i) renderPlayer(q);
+        }
+
+
+        aniRenderPlayer(i, direction, frame, start_x, y_axis);
+
+        //renderMoney();
+
+        SDL_RenderPresent(gRenderer);
+        SDL_Delay(SPEED);
+        SDL_RenderClear(gRenderer);
+
+
+        frame = (frame + 1) % ANIMATION_FRAMES;
+        start_x += ANIMATION_DISPLACE;
+    }
+
+    return true;
+}
+
+
+bool animatedColOne(int start, int end, int i) {
+    if (end <= start) {
+        return false;
+    }
+    int frame = 0;
+    int direction = 3;
+    int start_y = listOfSquare[start].y;
+    int end_y = listOfSquare[end].y;
+
+    int x_axis = listOfSquare[start].x;
+
+    while(start_y >= end_y) {
+        SDL_RenderCopy(gRenderer, board, NULL, NULL);
+        for (int q = 0; q < NUM_PLAYER; q++) {
+            if (q != i) renderPlayer(q);
+        }
+
+        aniRenderPlayer(i, direction, frame, x_axis, start_y);
+
+        //renderMoney();
+
+        SDL_RenderPresent(gRenderer);
+        SDL_Delay(SPEED);
+        SDL_RenderClear(gRenderer);
+
+
+        frame = (frame + 1) % ANIMATION_FRAMES;
+        start_y -= ANIMATION_DISPLACE;
+    }
+
+
+    return true;
+}
+
+bool animatedColTwo(int start, int end, int i) {
+    if (end <= start) {
+        return false;
+    }
+    int frame = 0;
+    int direction = 0;
+    int start_y = listOfSquare[start].y;
+    int end_y = listOfSquare[end].y;
+
+    int x_axis = listOfSquare[start].x;
+
+    while(start_y <= end_y) {
+        SDL_RenderCopy(gRenderer, board, NULL, NULL);
+        for (int q = 0; q < NUM_PLAYER; q++) {
+            if (q != i) renderPlayer(q);
+        }
+
+        aniRenderPlayer(i, direction, frame, x_axis, start_y);
+
+        //renderMoney();
+
+        SDL_RenderPresent(gRenderer);
+        SDL_Delay(SPEED);
+        SDL_RenderClear(gRenderer);
+
+
+        frame = (frame + 1) % ANIMATION_FRAMES;
+        start_y += ANIMATION_DISPLACE;
+    }
+
+
+    return true;
+}
+
+void aniRenderPlayer(int i,int direction, int frame ,int x, int y) {
+    SDL_Rect re;
+    setRect(&re, x, y, WIDTH_OF_PLAYER, WIDTH_OF_PLAYER);
+
+    SDL_RenderCopy(gRenderer, players ,&aniSprite[i][direction][frame], &re);
+
+}
+
+void animation(int previousBoard, int i) {
+    printf("Hello world to debug\n");
+
+    int currentBoard = listOfPlayers[i]->currentBlock;
+    if (previousBoard <= currentBoard) {
+        if (currentBoard <= 10) {
+            animatedColOne(previousBoard, currentBoard, i);
+        } else if (currentBoard <= 20) {
+            if (animatedRowOne(previousBoard, 10, i)) {
+                animatedColOne(10, currentBoard, i);
+            } else {
+                animatedColOne(previousBoard, currentBoard, i);
+            }
+
+        } else if (currentBoard <= 30) {
+            if (animatedRowOne(previousBoard, 10, i)) {
+                animatedColOne(10, 20, i);
+                animatedRowTwo(20, currentBoard, i);
+            } else {
+                animatedColOne(previousBoard, 20, i);
+                animatedRowTwo(20, currentBoard, i);
+            }
+        } else if (currentBoard <= 39) {
+            if (animatedColTwo(previousBoard, 20, i)) {
+                animatedRowTwo(20, 30, i);
+                animatedColTwo(30, currentBoard, i);
+            } else {
+                animatedRowTwo(previousBoard, 30, i);
+                animatedColTwo(30, currentBoard, i);
+            }
+        } else {
+            fprintf(stderr, "animation wrong\n");
+            exit(EXIT_FAILURE);
+        }
+
+    } else {
+        if (previousBoard < 30) {
+            animatedRowTwo(previousBoard, 30, i);
+            animatedColTwo(30, 39, i);
+            animatedRowOne(0, currentBoard, i);
+        } else {
+            animatedColTwo(previousBoard, 39, i);
+            animatedRowOne(0, currentBoard, i);
+        }
+    }
+
+    renderAllPlayer();
+
+}
+
+
+void renderAllPlayer() {
+    for (int q = 0; q < NUM_PLAYER; q++) {
+        renderPlayer(q);
+    }
+}
+
+/*
 void animation(int previousBoard, int i) {
     if (previousBoard <= listOfPlayers[i]->currentBlock) {
         for (int start = previousBoard; start <= listOfPlayers[i]->currentBlock; start++) {
@@ -416,6 +622,7 @@ void animation(int previousBoard, int i) {
     }
 
 }
+*/
 
 void renderPlayer(int number) {
     SDL_RenderCopy(gRenderer, players, &renderQuad[number], &(listOfPlayers[number]->rect));
@@ -451,14 +658,14 @@ bool init() {
     lower.w = WIDTH;
     lower.h = HEIGHT/2;
 
-    //initilize renderQuad;
-    setRect(&renderQuad[0], 0, 0, WIDTH_OF_PLAYER, WIDTH_OF_PLAYER);
-    setRect(&renderQuad[1], 0,WIDTH_OF_PLAYER, WIDTH_OF_PLAYER, WIDTH_OF_PLAYER);
-    setRect(&renderQuad[2], WIDTH_OF_PLAYER, 0, WIDTH_OF_PLAYER, WIDTH_OF_PLAYER);
-    setRect(&renderQuad[3], WIDTH_OF_PLAYER,WIDTH_OF_PLAYER, WIDTH_OF_PLAYER,WIDTH_OF_PLAYER);
+    //init renderQuad == start behaviour;
+
+    for (int i = 0; i < NUM_PLAYER; i++) {
+        setRect(&renderQuad[i], 0, i*4*WIDTH_OF_PLAYER, WIDTH_OF_PLAYER, WIDTH_OF_PLAYER);
+    }
 
     //starting position
-    setRect(&startRect, 1240 - OFFSET, 920, 30, 30);
+    setRect(&startRect, 1240 - OFFSET, 920,WIDTH_OF_PLAYER , WIDTH_OF_PLAYER);
 
     for (int i = 0; i < NUM_PLAYER; i++) {
         setRect(&posiVecMoney[i],X_TOPLEFT_MONEY, Y_TOPLEFT_MONEY + i * GAP_MONEY, W_MONEY, H_MONEY);
@@ -487,22 +694,22 @@ void initPlayer() {
 void initSquaresHelp() {
     //first row
     for (int i = 0; i <= 10; i++) {
-        setRect(&listOfSquare[i],startRect.x - 80 *i , startRect.y, 30, 30);
+        setRect(&listOfSquare[i],startRect.x - 80 *i , startRect.y, WIDTH_OF_PLAYER, WIDTH_OF_PLAYER);
     }
 
     for (int i = 11; i <= 20; i++) {
-        setRect(&listOfSquare[i], listOfSquare[10].x, listOfSquare[10].y-80 * (i-10), 30, 30);
+        setRect(&listOfSquare[i], listOfSquare[10].x, listOfSquare[10].y-80 * (i-10), WIDTH_OF_PLAYER, WIDTH_OF_PLAYER);
     }
 
     for (int i = 21; i <= 30; i++) {
-        setRect(&listOfSquare[i], listOfSquare[20].x + 80 * (i- 20), listOfSquare[20].y, 30, 30);
+        setRect(&listOfSquare[i], listOfSquare[20].x + 80 * (i- 20), listOfSquare[20].y, WIDTH_OF_PLAYER, WIDTH_OF_PLAYER);
     }
 
     for (int i = 31; i <= 39; i++) {
-        setRect(&listOfSquare[i], listOfSquare[30].x, listOfSquare[30].y + 80 * (i-30), 30, 30);
+        setRect(&listOfSquare[i], listOfSquare[30].x, listOfSquare[30].y + 80 * (i-30), WIDTH_OF_PLAYER, WIDTH_OF_PLAYER);
     }
 
-    setRect(&listOfSquare[40], listOfSquare[10].x-85, listOfSquare[10].y, 30, 30);
+    setRect(&listOfSquare[40], listOfSquare[10].x-85, listOfSquare[10].y, WIDTH_OF_PLAYER, WIDTH_OF_PLAYER);
 
 }
 
@@ -544,12 +751,31 @@ void isError(void *ip) {
 
 void loadCharacter() {
     SDL_Surface *sprite;
-    sprite = IMG_Load("dots.png");
+    sprite = IMG_Load("dot3.png");
 
     players = SDL_CreateTextureFromSurface(gRenderer, sprite);
 
     SDL_FreeSurface(sprite);
 }
+
+void initAnimation() {
+    for (int i = 0; i < NUM_PLAYER; i++) {
+        for (int q = 0; q < NUM_PLAYER; q++) {
+            for (int j = 0; j < NUM_PLAYER; j++) {
+
+                SDL_Rect ha;
+                ha.x = j * WIDTH_OF_PLAYER;
+                ha.y = i * (4 * WIDTH_OF_PLAYER) + q * WIDTH_OF_PLAYER;
+                ha.w = WIDTH_OF_PLAYER;
+                ha.h = WIDTH_OF_PLAYER;
+
+
+                aniSprite[i][q][j] = ha;
+            }
+        }
+    }
+}
+
 
 void loadBoard() {
     SDL_Surface *background;
@@ -1026,3 +1252,4 @@ void initChances() {
     listOfChances[7]->type = MONEY;
     
 }
+
