@@ -23,11 +23,11 @@
 #define DICE_SIZE 6
 #define OFFSET 224
 
-#define X_TOPLEFT_MONEY 1619
-#define Y_TOPLEFT_MONEY 196
-#define W_MONEY 93
-#define H_MONEY 34
-#define GAP_MONEY 65
+#define X_TOPLEFT_MONEY 1547
+#define Y_TOPLEFT_MONEY 134
+#define W_MONEY 70
+#define H_MONEY 28
+#define GAP_MONEY 40
 
 #define HEIGHT_CARD 330
 #define WIDTH_CARD 577
@@ -40,21 +40,16 @@
 //animation
 #define ANIMATION_FRAMES 3
 #define ANIMATION_DISPLACE 10
-void loadIndCha(int id);
-bool animatedRowOne(int start, int end, int i);
-bool animatedColOne(int start, int end, int i);
-bool animatedRowTwo(int start, int end, int i);
-bool animatedColTwo(int start, int end, int i);
-
-void aniRenderPlayer(int i,int direction, int frame, int x, int y);
-void renderAllPlayer();
-void initAnimation();
-
-//SDL position rect
-SDL_Rect upper;
-SDL_Rect lower;
 
 
+//estate
+#define WIDTH_OF_MARK 20
+void add(int i);
+int estates[NUM_PLAYER][NUM_SQUARE];
+void initEstates();
+void renderMarks();
+int num_of_estats[NUM_PLAYER];
+void helpRenderMark(int posi, int i);
 
 enum student{
     INTERNATIONAL = 0,
@@ -106,6 +101,7 @@ struct chanceCard {
 SDL_Window *gWindow;
 SDL_Renderer *gRenderer;
 
+SDL_Texture* marks;
 SDL_Texture* board;
 SDL_Texture* players;
 SDL_Texture* gChance;
@@ -120,6 +116,7 @@ struct square *listOfLogicSquare[NUM_SQUARE];
 struct chanceCard *listOfChances[NUM_OF_CHANCE];
 
 //square processing
+void squareProcessing(int id, Square *currentSquare, int dice);
 void goToUCL(int id);
 void department(int id);
 void station(int id);
@@ -128,6 +125,19 @@ void ucl(int id);
 void freePizza(int id);
 void tax(int id);
 void utility(int id, int distacne);
+
+
+//animation
+void loadIndCha(int id);
+bool animatedRowOne(int start, int end, int i);
+bool animatedColOne(int start, int end, int i);
+bool animatedRowTwo(int start, int end, int i);
+bool animatedColTwo(int start, int end, int i);
+
+void aniRenderPlayer(int i,int direction, int frame, int x, int y);
+void renderAllPlayer();
+void initAnimation();
+
 
 void buy(int id);
 
@@ -139,9 +149,9 @@ void lostMoney(int id, int amount);
 void gainMoney(int id, int amount);
 
 void renderChance(int index);
+void globalRender();
 
-
-bool init();
+void init();
 void loadBoard();
 void loadCharacter();
 SDL_Texture *loadMedia(char *path);
@@ -151,17 +161,40 @@ void initSquares();
 void initChances();
 
 void renderPlayer(int number);
-void renderCurrentPlayer(int number, int passby);
 void animation(int previousBlock, int id);
 void collisionDetection(int id);
 void renderMoney();
 SDL_Texture *createFromText(char *);
 
+//marking the estate
 
-void printPlayer(struct player *play);
 
 void close();
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void SetupPriceAndFine(int i, int price, int fine);
+void SetupDepartment(int i, int price, int fine);
+void SetupUtility(int i, int price, int fine);
+void SetupStation(int i, int price, int fine);
 
 void initBoard(void);
 void initBuyable(void);

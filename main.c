@@ -2,13 +2,7 @@
 #include "main.h"
 
 int main() {
-    initAnimation();
     init();
-    loadBoard();
-    loadCharacter();
-    initPlayer();
-    initSquares();
-    initChances();
 
     bool quit = false;
     SDL_Event e;
@@ -18,26 +12,19 @@ int main() {
 
         SDL_WaitEvent(&e);
 
+        if (e.type == SDL_QUIT) quit = true;
 
-        if (e.type == SDL_QUIT) {
-            quit = true;
-        }
-
-        if (e.key.keysym.sym == SDLK_q) {
-            quit = true;
-        }
+        if (e.key.keysym.sym == SDLK_q) quit = true;
 
         if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
             if (e.key.keysym.sym == SDLK_r) {
                 int i = count;
-                printf("hihi\n");
-                count = (count + 1) % NUM_PLAYER;
 
                 struct player *currentPlayer = listOfPlayers[i];
 
                 int previousBoard = currentPlayer->currentBlock;
 
-                int dice = 7;// mimicDice();
+                int dice = mimicDice();
 
                 if (currentPlayer->inUCL) {
                     if (dice == 12 || dice == 1 || dice == 2) {
@@ -52,80 +39,106 @@ int main() {
 
                 currentPlayer->rect = listOfSquare[currentPlayer->currentBlock];
 
-                animation(previousBoard, i);
-
                 Square *currentSquare = listOfLogicSquare[currentPlayer->currentBlock];
 
+                animation(previousBoard, i);
+
                 collisionDetection(i);
-                SDL_RenderClear(gRenderer);
-                SDL_RenderCopy(gRenderer, board, NULL, NULL);
 
-                //renderMoney();
+                globalRender();
 
-                for (int q = 0; q < NUM_PLAYER; q++) {
-                    renderPlayer(q);
-                }
+                squareProcessing(i, currentSquare, dice);
 
-                SDL_RenderPresent(gRenderer);
-                /*        
-                switch (currentSquare->type) {
-                    case DEPARTMENT:
-                        department(i);
-                        break;
-                    case STATION:
-                        station(i);
-                        break;
-                    case UTILITY:
-                        utility(i, dice);
-                        break;
-                    case CHANCE:
-                        chance(i);
-                        break;
-                    case TAX:
-                        tax(i);
-                        break;
-                    case FREEPIZZA:
-                        freePizza(i);
-                        break;
-                    case UCL:
-                        ucl(i);
-                        break;
-                    case GOTOUCL:
-                        goToUCL(i);
-                        break;
-                    case GO:
-                        break;
-
-                    default:
-                        printf("even god can't let this be printed");
-                        exit(EXIT_FAILURE);
-                }
-
-                */
-
-                //count = (count + 1) % NUM_PLAYER;
-
-
+                count = (count + 1) % NUM_PLAYER;
             } 
         }
 
         RENDER:
-        SDL_RenderClear(gRenderer);
-        SDL_RenderCopy(gRenderer, board, NULL, NULL);
-        //renderMoney();
-
-
-        for (int q = 0; q < NUM_PLAYER; q++) {
-            renderPlayer(q);
-        }
-
-        SDL_RenderPresent(gRenderer);
+        globalRender();
     }
+
+
 
     close();
     deleteBoard();
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void globalRender() {
+    SDL_RenderClear(gRenderer);
+    SDL_RenderCopy(gRenderer, board, NULL, NULL);
+    renderMoney();
+    renderMarks();
+    renderAllPlayer();
+    SDL_RenderPresent(gRenderer);
+}
+
+void squareProcessing(int i, Square *currentSquare, int dice) {
+    switch (currentSquare->type) {
+        case DEPARTMENT:
+            department(i);
+            break;
+        case STATION:
+            station(i);
+            break;
+        case UTILITY:
+            utility(i, dice);
+            break;
+        case CHANCE:
+            chance(i);
+            break;
+        case TAX:
+            tax(i);
+            break;
+        case FREEPIZZA:
+            freePizza(i);
+            break;
+        case UCL:
+            ucl(i);
+            break;
+        case GOTOUCL:
+            goToUCL(i);
+            break;
+        case GO:
+            break;
+        default:
+            printf("even god can't let this be printed");
+            exit(EXIT_FAILURE);
+    }
+}
 
 void goToUCL(int id) {
     struct player *currentPlayer = listOfPlayers[id];
@@ -233,7 +246,7 @@ void renderChance(int index) {
 
     SDL_RenderCopy(gRenderer, gChance, &posi, &middleOfBoard);
     SDL_RenderPresent(gRenderer);
-    SDL_Delay(3000);
+    SDL_Delay(1000);
 }
 
 void ucl(int id) {
@@ -273,7 +286,7 @@ void buy(int id) {
                 if (listOfPlayers[id]->money >= cur->price) {
                     cur->owner = id;
                     lostMoney(id, cur->price);
-
+                    add(id);
                     //TODO Notification
                 } else {
                     //TODO Trading
@@ -384,7 +397,8 @@ bool animatedRowOne(int start, int end, int i) {
 
         aniRenderPlayer(i, direction, frame, start_x, y_axis);
 
-        //renderMoney();
+        renderMoney();
+        renderMarks();
 
         SDL_RenderPresent(gRenderer);
         SDL_Delay(SPEED);
@@ -421,7 +435,8 @@ bool animatedRowTwo(int start, int end, int i) {
 
         aniRenderPlayer(i, direction, frame, start_x, y_axis);
 
-        //renderMoney();
+        renderMoney();
+        renderMarks();
 
         SDL_RenderPresent(gRenderer);
         SDL_Delay(SPEED);
@@ -455,7 +470,8 @@ bool animatedColOne(int start, int end, int i) {
 
         aniRenderPlayer(i, direction, frame, x_axis, start_y);
 
-        //renderMoney();
+        renderMoney();
+        renderMarks();
 
         SDL_RenderPresent(gRenderer);
         SDL_Delay(SPEED);
@@ -489,7 +505,8 @@ bool animatedColTwo(int start, int end, int i) {
 
         aniRenderPlayer(i, direction, frame, x_axis, start_y);
 
-        //renderMoney();
+        renderMoney();
+        renderMarks();
 
         SDL_RenderPresent(gRenderer);
         SDL_Delay(SPEED);
@@ -513,12 +530,12 @@ void aniRenderPlayer(int i,int direction, int frame ,int x, int y) {
 }
 
 void animation(int previousBoard, int i) {
-    printf("Hello world to debug\n");
 
     int currentBoard = listOfPlayers[i]->currentBlock;
     if (previousBoard <= currentBoard) {
+
         if (currentBoard <= 10) {
-            animatedColOne(previousBoard, currentBoard, i);
+            animatedRowOne(previousBoard, currentBoard, i);
         } else if (currentBoard <= 20) {
             if (animatedRowOne(previousBoard, 10, i)) {
                 animatedColOne(10, currentBoard, i);
@@ -527,21 +544,27 @@ void animation(int previousBoard, int i) {
             }
 
         } else if (currentBoard <= 30) {
+
             if (animatedRowOne(previousBoard, 10, i)) {
                 animatedColOne(10, 20, i);
                 animatedRowTwo(20, currentBoard, i);
-            } else {
-                animatedColOne(previousBoard, 20, i);
+            } else if (animatedColOne(previousBoard, 20, i)){
                 animatedRowTwo(20, currentBoard, i);
+            } else {
+                animatedRowTwo(previousBoard, currentBoard, i);
             }
+
         } else if (currentBoard <= 39) {
+
             if (animatedColTwo(previousBoard, 20, i)) {
                 animatedRowTwo(20, 30, i);
                 animatedColTwo(30, currentBoard, i);
-            } else {
-                animatedRowTwo(previousBoard, 30, i);
+            } else if (animatedRowTwo(previousBoard, 30,i)){
                 animatedColTwo(30, currentBoard, i);
+            } else {
+                animatedColTwo(previousBoard, currentBoard, i);
             }
+
         } else {
             fprintf(stderr, "animation wrong\n");
             exit(EXIT_FAILURE);
@@ -558,8 +581,6 @@ void animation(int previousBoard, int i) {
         }
     }
 
-    renderAllPlayer();
-
 }
 
 
@@ -569,71 +590,15 @@ void renderAllPlayer() {
     }
 }
 
-/*
-void animation(int previousBoard, int i) {
-    if (previousBoard <= listOfPlayers[i]->currentBlock) {
-        for (int start = previousBoard; start <= listOfPlayers[i]->currentBlock; start++) {
-
-            SDL_RenderCopy(gRenderer, board, NULL, NULL);
-
-            for (int q = 0; q < NUM_PLAYER; q++) {
-                if (q != i) renderPlayer(q);
-            }
-
-            renderCurrentPlayer(i, start);
-            //renderMoney();
-
-            SDL_RenderPresent(gRenderer);
-            SDL_Delay(SPEED);
-            SDL_RenderClear(gRenderer);
-
-
-        }
-    } else {
-        for (int start = previousBoard; start <= 39; start++) {
-
-            SDL_RenderCopy(gRenderer, board, NULL, NULL);
-
-            for (int q = 0; q < NUM_PLAYER; q++) {
-                if (q != i) renderPlayer(q);
-            }
-
-            renderCurrentPlayer(i, start);
-            SDL_RenderPresent(gRenderer);
-            SDL_Delay(SPEED);
-            SDL_RenderClear(gRenderer);
-        }
-
-        for (int start = 0; start < listOfPlayers[i]->currentBlock; start++) {
-
-            SDL_RenderCopy(gRenderer, board, NULL, NULL);
-
-            for (int q = 0; q < NUM_PLAYER; q++) {
-                if (q != i) renderPlayer(q);
-            }
-
-            renderCurrentPlayer(i, start);
-            SDL_RenderPresent(gRenderer);
-            SDL_Delay(SPEED);
-            SDL_RenderClear(gRenderer);
-
-        }
-
-    }
-
-}
-*/
 
 void renderPlayer(int number) {
     SDL_RenderCopy(gRenderer, players, &renderQuad[number], &(listOfPlayers[number]->rect));
 }
 
-void renderCurrentPlayer(int number, int passby) {
-    SDL_RenderCopy(gRenderer, players, &renderQuad[number], &listOfSquare[passby]);
-}
 
-bool init() {
-    bool success = true;
+void init() {
+    initEstates();
+    initAnimation();
 
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
@@ -643,35 +608,29 @@ bool init() {
     
     
     gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    //SDL_RenderSetLogicalSize(gRenderer, WIDTH, HEIGHT);
-    gfont = TTF_OpenFont("myfont.ttf", FONT_SIZE);
 
+    gfont = TTF_OpenFont("Font/future.ttf", FONT_SIZE);
 
-    upper.x = 0;
-    upper.y = 0;
-    upper.w = WIDTH;
-    upper.h = HEIGHT/2;
-
-    lower.x = 0;
-    lower.y = HEIGHT/2;
-    lower.w = WIDTH;
-    lower.h = HEIGHT/2;
-
-    //init renderQuad == start behaviour;
 
     for (int i = 0; i < NUM_PLAYER; i++) {
         setRect(&renderQuad[i], 0, i*4*WIDTH_OF_PLAYER, WIDTH_OF_PLAYER, WIDTH_OF_PLAYER);
     }
 
-    //starting position
     setRect(&startRect, 1240 - OFFSET, 920,WIDTH_OF_PLAYER , WIDTH_OF_PLAYER);
 
     for (int i = 0; i < NUM_PLAYER; i++) {
         setRect(&posiVecMoney[i],X_TOPLEFT_MONEY, Y_TOPLEFT_MONEY + i * GAP_MONEY, W_MONEY, H_MONEY);
     }
 
-    return success;
+    initAnimation();
+    loadBoard();
+    loadCharacter();
+    initPlayer();
+    initSquares();
+    initChances();
+
 }
 
 void initPlayer() {
@@ -718,8 +677,6 @@ void initSquares() {
     initBoard();
 }
 
-
-
 SDL_Texture *createFromText(char *str) {
     SDL_Surface *sdl_surface;
     SDL_Color color = {0,0,0xFF};
@@ -732,8 +689,6 @@ SDL_Texture *createFromText(char *str) {
 
     return newTexture;
 }
-
-
 
 void close() {
     SDL_DestroyRenderer(gRenderer);
@@ -751,7 +706,7 @@ void isError(void *ip) {
 
 void loadCharacter() {
     SDL_Surface *sprite;
-    sprite = IMG_Load("dot3.png");
+    sprite = IMG_Load("Sprite/character.png");
 
     players = SDL_CreateTextureFromSurface(gRenderer, sprite);
 
@@ -779,7 +734,7 @@ void initAnimation() {
 
 void loadBoard() {
     SDL_Surface *background;
-    background = SDL_LoadBMP("boardBLUE2.bmp");
+    background = SDL_LoadBMP("/Sprite/board_final.bmp");
     board = SDL_CreateTextureFromSurface(gRenderer, background);
 
 
@@ -795,11 +750,43 @@ void setRect(SDL_Rect *rect, int x, int y, int w, int h) {
 
 
 //init square
+/*typedef struct square {
+    int price;
+    int fine;
+    Type type;
+    int owner;
+} Square;*/
 
 void initBoard(void) {
+    //for (int i = 0; i < NUM_SQUARE; i++) listOfLogicSquare[i] = (Square *) malloc(sizeof(Square));
+
+    //listOfLogicSquare[0]->type = GO;
+
     initNotBought();
     initBuyable();
 }
+
+void SetupPriceAndFine(int i, int price, int fine) {
+    listOfLogicSquare[i]->fine = fine;
+    listOfLogicSquare[i]->price = price;
+}
+
+void SetupDepartment(int i, int price, int fine) {
+    SetupPriceAndFine(i, price, fine);
+    listOfLogicSquare[i]->type = DEPARTMENT;
+}
+
+void SetupStation(int i, int price, int fine) {
+    SetupPriceAndFine(i, price, fine);
+    listOfLogicSquare[i]->type = STATION;
+}
+
+void SetupUtility(int i, int price, int fine) {
+    SetupPriceAndFine(i, price, fine);
+    listOfLogicSquare[i]->type = UTILITY;
+}
+
+
 
 /* Initialises 28 buyable squares */
 void initBuyable(void) {
@@ -1214,7 +1201,7 @@ SDL_Texture *loadMedia(char *path) {
 
 void initChances() {
     SDL_Surface *sprite;
-    sprite = IMG_Load("Chances.png");
+    sprite = IMG_Load("Sprite/chance.png");
 
     gChance = SDL_CreateTextureFromSurface(gRenderer, sprite);
 
@@ -1252,4 +1239,70 @@ void initChances() {
     listOfChances[7]->type = MONEY;
     
 }
+
+void initEstates() {
+    for (int i = 0; i < NUM_PLAYER; i++) {
+        for (int j = 0; j < NUM_SQUARE; j++)
+            estates[i][j] = -1;
+
+        num_of_estats[i] = 0;
+    }
+}
+
+void add(int i) {
+    int cur = listOfPlayers[i]->currentBlock;
+    int index = num_of_estats[i];
+    estates[i][index] = cur;
+
+    num_of_estats[i]++;
+}
+
+void renderMarks() {
+    for (int i = 0; i < NUM_PLAYER; i++) {
+        int num = num_of_estats[i];
+
+        for (int q = 0; q < num; q++) {
+            helpRenderMark(estates[i][q], i);
+        }
+    }
+
+}
+
+void helpRenderMark(int posi, int i) {
+    //first row
+    if (i == 0) {
+        SDL_SetRenderDrawColor( gRenderer,204 , 99, 151, 0xFF );
+    } else if (i == 1) {
+        SDL_SetRenderDrawColor(gRenderer, 0, 12, 61, 0xFF);
+    } else if (i == 2) {
+        SDL_SetRenderDrawColor(gRenderer, 0, 0xFF, 0, 0xFF);
+        //SDL_SetRenderDrawColor(gRenderer,195, 195, 196, 0xFF);
+    } else {
+        SDL_SetRenderDrawColor(gRenderer, 0xFF,0,0,0xFF);
+    }
+
+    SDL_Rect ref = listOfSquare[posi];
+    SDL_Rect fillrect;
+    fillrect.w = WIDTH_OF_MARK;
+    fillrect.h = WIDTH_OF_MARK;
+    if (posi >= 1 && posi <= 9) {
+        fillrect.x = ref.x;
+        fillrect.y = 880;
+    } else if (posi >= 11 && posi <= 19) {
+        fillrect.x = 280;
+        fillrect.y = ref.y;
+    } else if (posi >= 21 && posi <= 29) {
+        fillrect.x = ref.x;
+        fillrect.y = 182;
+    } else if (posi >= 31 && posi <= 39) {
+        fillrect.x = 980;
+        fillrect.y = ref.y;
+    } else {
+        printf("not a buyable thing, can't give a mark\n");
+        exit(EXIT_FAILURE);
+    }
+
+    SDL_RenderFillRect(gRenderer, &fillrect);
+}
+
 
